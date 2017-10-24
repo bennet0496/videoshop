@@ -15,6 +15,9 @@
  */
 package videoshop.order;
 
+import org.salespointframework.order.CartItem;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.ModelAndView;
 import videoshop.catalog.Disc;
 
 import java.util.Optional;
@@ -83,37 +86,44 @@ class OrderController {
 	 * 
 	 * @param disc
 	 * @param number
-	 * @param session
-	 * @param modelMap
+	 * @param cart
 	 * @return
 	 */
 	@PostMapping("/cart")
-	String addDisc(@RequestParam("pid") Disc disc, @RequestParam("number") int number, @ModelAttribute Cart cart) {
+  ModelAndView addDisc(@RequestParam("pid") Disc disc, @RequestParam("number") int number, @ModelAttribute Cart cart) {
+    ModelAndView view = new ModelAndView("cart");
 
-		// (｡◕‿◕｡)
-		// Das Inputfeld im View ist eigentlich begrenzt, allerdings sollte man immer auch serverseitig validieren
-		int amount = number <= 0 || number > 5 ? 1 : number;
 
-		// (｡◕‿◕｡)
-		// Wir fügen dem Warenkorb die Disc in entsprechender Anzahl hinzu.
-		cart.addOrUpdateItem(disc, Quantity.of(amount));
+		if(cart.stream().filter(i -> i.getProduct().getId().equals(disc.getId())).findFirst().
+        map(CartItem::getQuantity).orElseGet(() -> Quantity.of(0)).
+        add(Quantity.of(number)).isGreaterThan(Quantity.of(5))){
+      view.addObject("err", "amount-to-high");
+    }else {
+      // Wir fügen dem Warenkorb die Disc in entsprechender Anzahl hinzu.
+      cart.addOrUpdateItem(disc, Quantity.of(number));
+    }
 
-		// (｡◕‿◕｡)
-		// Je nachdem ob disc eine DVD oder eine Bluray ist, leiten wir auf die richtige Seite weiter
+    return view;
 
-		switch (disc.getType()) {
+		/*switch (disc.getType()) {
 			case DVD:
 				return "redirect:dvds";
 			case BLURAY:
 			default:
 				return "redirect:blurays";
-		}
+		}*/
 	}
 
 	@GetMapping("/cart")
 	String basket() {
 		return "cart";
 	}
+
+  @GetMapping("/cart/remove/{item}")
+  String removeCartItem(@PathVariable String item, @ModelAttribute Cart cart) {
+	    cart.removeItem(item);
+	    return "redirect:/cart";
+  }
 
 	/**
 	 * Checks out the current state of the {@link Cart}. Using a method parameter of type {@code Optional<UserAccount>}

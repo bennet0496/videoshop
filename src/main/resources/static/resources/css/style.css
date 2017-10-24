@@ -17,3 +17,21 @@ img.thumbnail {
 	width: 160px;
 	display: block;
 }
+
+.orderdialog {
+	float: right;
+	position: relative;
+	right: 5px;
+	max-width: 300px;
+	min-width: 120px;
+	display: block;
+	border-radius: 4px;
+	border: 1px #ddd solid;
+	background-color: #fff;
+	padding: 20px;
+	height: 200px;
+}
+
+.comment .content .user {
+  font-weight: 600;
+}

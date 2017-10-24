@@ -21,7 +21,13 @@
         <h1 th:text="#{cart.title}">Warenkorb</h1>
     </header>
     <nav th:include="navigation :: navigation"></nav>
-
+    <div th:if="${err} and ${err} == 'amount-to-high'" class="ui negative message">
+        <i class="close icon"></i>
+        <div class="header" th:text="#{cart.tooManyItems}">
+            Too many Items
+        </div>
+        <p th:text="#{cart.amountToHigh}">Too many Items</p>
+    </div>
     <div th:unless="${cart.empty}">
         <table class="ui celled table">
             <thead>
@@ -29,29 +35,16 @@
                 <th th:text="#{cart.movieTitle}">Titel</th>
                 <th th:text="#{cart.count}">Anzahl</th>
                 <th th:text="#{cart.price}">Preis</th>
+                <th width="21">&nbsp;</th>
             </tr>
             </thead>
             <tbody th:remove="all-but-first">
 
             <tr th:each="item : ${cart} ">
-                <td th:text="${item.productName}">Last Action Hero</td>
-                <td th:text="${item.quantity}">10</td>
-                <td th:text="${{item.price}}">10 Euro</td>
-            </tr>
-            <tr>
-                <td>Last Action Hero</td>
-                <td>10</td>
-                <td>10 Euro</td>
-            </tr>
-            <tr>
-                <td>Last Action Hero</td>
-                <td>10</td>
-                <td>10 Euro</td>
-            </tr>
-            <tr>
-                <td>Last Action Hero</td>
-                <td>10</td>
-                <td>10 Euro</td>
+              <td><a th:text="${item.productName}" th:href="@{/disc/{id}(id=${item.product.id})}">Last Action Hero</a></td>
+              <td th:text="${item.quantity}">10</td>
+              <td th:text="${{item.price}}">10 Euro</td>
+              <td width="21"><a th:href="@{/cart/remove/{id}(id=${item.id})}"><i class="trash icon"></i></a></td>
             </tr>
             </tbody>
         </table>

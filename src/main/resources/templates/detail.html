@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 
@@ -35,8 +35,12 @@
                     <span th:text="${{disc.price}}">9.99 €</span>
                 </div>
                 <div class="description">
-                    <p>Vorrat:</p>
-                    <p th:text="${quantity}">10</p><br/>
+                    <p th:if="${quantity.getAmount().intValue() &gt;= 15}" style="color: green;">Auf Lager.</p>
+                    <p th:if="${quantity.getAmount().intValue() &lt; 15} and ${quantity.getAmount().intValue() &gt; 0}" th:text="'Nur noch '+${quantity}+' Lagernd'" style="color: darkorange;">14</p>
+                    <p th:if="${quantity.getAmount().intValue()} == 0" style="color: red;">Derzeit nicht auf Lager. Nachschub ist bestellt.</p><br/>
+                </div>
+            </div>
+                <div class="orderdialog">
                     <form class="ui form" method="post" th:action="@{/cart}" th:if="${orderable}">
                         <input type="hidden" name="pid" value="0" th:value="${disc.id}"/>
                         <div class="field">
@@ -48,7 +52,8 @@
                         </button>
                     </form>
                 </div>
-            </div>
+
+
         </div>
     </div>
 
@@ -57,17 +62,20 @@
 
         <div class="comment" th:each="comment : ${disc.comments}">
             <div class="content">
+                <div class="user" th:text="${comment.username}">VideoShop Kunde</div>
                 <div class="metadata">
                     <div class="rating">
-                        <i class="star icon"></i>
-                        <span th:text="${comment.rating}">5</span>
+                      <span><i th:each="i : ${#numbers.sequence(1, comment.rating)}" class="star icon"></i></span>
+                      <span th:if="${comment.rating &lt; 5}"><i th:each="i : ${#numbers.sequence(1, 5 - comment.rating)}" class="empty star icon"></i></span>
+                      <span>&nbsp;</span>
+                      <span th:text="${#temporals.format(comment.date, 'dd. MMMM yyyy')}"></span>
                     </div>
                 </div>
-                <div class="text" th:text="${comment.text}">Guter Film vong Inhalt her</div>
+                <div class="text" th:text="${comment.text}">&nbsp;</div>
             </div>
         </div>
-
-        <form class="ui reply form" role="form" th:action="@{/disc/{id}/comments(id=${disc.id})}" method="post">
+        <hr />
+        <form class="ui reply form" role="form" sec:authorize="isAuthenticated()" th:action="@{/disc/{id}/comments(id=${disc.id})}" method="post">
             <div class="field">
                 <textarea id="comment" name="comment" cols="40" rows="5"></textarea><br/>
             </div>

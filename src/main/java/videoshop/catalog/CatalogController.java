@@ -15,6 +15,8 @@
  */
 package videoshop.catalog;
 
+import org.salespointframework.useraccount.UserAccount;
+import org.salespointframework.useraccount.web.LoggedIn;
 import videoshop.catalog.Disc.DiscType;
 
 import java.time.LocalDateTime;
@@ -97,10 +99,13 @@ class CatalogController {
 	// Der Katalog bzw die Datenbank "weiß" nicht, dass die Disc mit einem Kommentar versehen wurde,
 	// deswegen wird die update-Methode aufgerufen
 	@PostMapping("/disc/{disc}/comments")
-	public String comment(@PathVariable Disc disc, @Valid CommentAndRating payload) {
+	public String comment(@PathVariable Disc disc, @Valid CommentAndRating payload, @LoggedIn Optional<UserAccount> userAccount) {
 
-		disc.addComment(payload.toComment(businessTime.getTime()));
-		catalog.save(disc);
+		userAccount.ifPresent(account -> {
+			disc.addComment(payload.toComment(businessTime.getTime(), account.getUsername()));
+			catalog.save(disc);
+		});
+
 
 		return "redirect:/disc/" + disc.getId();
 	}
@@ -112,14 +117,14 @@ class CatalogController {
 	 */
 	interface CommentAndRating {
 
-		@NotEmpty
+		//@NotEmpty
 		String getComment();
 
 		@Range(min = 1, max = 5)
 		int getRating();
 
-		default Comment toComment(LocalDateTime time) {
-			return new Comment(getComment(), getRating(), time);
+		default Comment toComment(LocalDateTime time, String username) {
+			return new Comment(getComment(), getRating(), time, username);
 		}
 	}
 }
