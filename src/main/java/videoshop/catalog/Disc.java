@@ -86,4 +86,12 @@ public class Disc extends Product {
 	public DiscType getType() {
 		return type;
 	}
+
+	public long getNumberOfRating(int rating) {
+		return comments.stream().filter(c -> c.getRating() == rating).count();
+	}
+
+	public int getPercentageOfRating(int rating) {
+		return (int)Math.floor((double) comments.size() / (double) getNumberOfRating(rating)* 100);
+	}
 }
